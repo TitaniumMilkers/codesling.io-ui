@@ -26,7 +26,8 @@ export default class Signup extends Component {
       username
     }
     try {
-      const data = await axios.post(`http://localhost:3396/api/auth/signup`, body);
+      const data = await axios.post(`http://ec2-13-56-228-82.us-west-1.compute.amazonaws.com
+      :3396/api/auth/signup`, body);
       data ? this.props.history.push('/login') : this.props.history.push('/auth');
     } catch (err) {
       throw new Error(err);

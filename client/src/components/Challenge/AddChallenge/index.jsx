@@ -36,7 +36,8 @@ class AddChallenge extends Component {
     }
 
     try {
-      const result = await axios.post('http://localhost:3396/api/challenges', body);
+      const result = await axios.post('http://ec2-13-56-228-82.us-west-1.compute.amazonaws.com
+      :3396/api/challenges', body);
       console.log('You made a challenge. Here is your challenge ID: ', result.data.id)
       this.setState({
         challenge_id: result.data.id,
@@ -77,7 +78,8 @@ class AddChallenge extends Component {
     }
 
     try {
-      const result = await axios.post('http://localhost:3396/api/testCases', payload);
+      const result = await axios.post('http://ec2-13-56-228-82.us-west-1.compute.amazonaws.com
+      :3396/api/testCases', payload);
       console.log('You added a test! Here is the data back from the server:', result)
 
       this.setState({
