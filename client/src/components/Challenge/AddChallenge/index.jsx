@@ -53,7 +53,7 @@ class AddChallenge extends Component {
     e.preventDefault()
     const {testName, testInput, testOutput} = this.state;
     let test = [];
-    test.push(testName, testInput, testOutput)
+    test.push(testName, JSON.parse(testInput), JSON.parse(testOutput));
     let newStateArr = this.state.testList
     newStateArr.push(test)
     console.log('newStateArr', newStateArr)

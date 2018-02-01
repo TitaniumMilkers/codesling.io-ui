@@ -24,6 +24,7 @@ class Sling extends Component {
       text: '', //I think this is not used? 
       challenge: '', //the challenge selected from the challenge table.
       stdout: '', //the user's console-logged text that appears above Run Code when click Run Code
+      testResults: null,
       challengeWinner: 'none' // added. once someone wins the challenge, the appropriate 'winner' or 'loser' modal
                               //will display to let the users know.
     }
@@ -44,7 +45,7 @@ class Sling extends Component {
         ownerText: text,
         challengerText: text,
         challenge
-      }, ()=>{console.log('Sling.jsx on component mounted --> \n\n this.state:', this.state, '\n\nthis.props: ', this.props, '\n\ntypeofthis.props.location.state.testCases[0].content', typeof this.props.location.state.testCases[0].content)});
+      }, ()=>{console.log('Sling.jsx on component mounted --> \n\n this.state:', this.state, '\n\nthis.props: ', this.props, '\n\ntypeofthis.props.location.state.testCases[0].content')});
     });
     
     socket.on('server.changed', ({ text, email }) => {
@@ -60,22 +61,34 @@ class Sling extends Component {
     //to update challengeWinnerstate.
     //this gets the output for both challenge users. it just only sets state for stdout
     //when the email on the data matches this users email addy
-    socket.on('server.run', ({ stdout, email }) => {
+    socket.on('server.run', ({ stdout, email, testResults }) => {
       const ownerEmail = localStorage.getItem('email');
+      console.log('TESTRES', testResults);
       console.log('i am standard output:', stdout)
       email === ownerEmail ? this.setState({ stdout }) : null;
+      email === ownerEmail ? this.setState({testResults: testResults}) : null;
+      console.log('state tes res', this.state.testResults);
+      var passedAllTests = true;
+      for (let i = 0; i < testResults.length; i++) {
+        if (testResults[i].content[4] !== true) {
+          passedAllTests = false;
+          return;
+        }
+      }
+      passedAllTests === true && email === ownerEmail ? this.setState({challengeWinner: 'winner'}) : this.setState({challengeWinner: 'loser'});
     });
     
     window.addEventListener('resize', this.setEditorSize);
   }
-  
+
   submitCode = () => {
     const { socket } = this.props;
     const { ownerText } = this.state;
     const testCases = this.props.location.state.testCases;
+    const challengeTitle = this.props.location.state.challenge.title;
     const email = localStorage.getItem('email');
     // emit to the server when a user wants to run code in editor.
-    socket.emit('client.run', { text: ownerText, email });
+    socket.emit('client.run', { text: ownerText, email, testCases, challengeTitle: challengeTitle});
   }
   
   handleChange = throttle((editor, metadata, value) => {
@@ -167,6 +180,11 @@ class Sling extends Component {
             onClick={() => this.submitCode()}
           />
         </div>
+        <div>{this.state.testResults ? this.state.testResults.map((testResult)=> 
+        <div> {`Test "${testResult.content[0]}" ${testResult.content[4] ? ' passed' : ' failed'} : Expected ${testResult.content[3]} to equal ${testResult.content[2]} given an input of ${testResult.content[1]}` } </div>) : null }
+        </div>
+
+
         <div className="code2-editor-container">
           <CodeMirror 
             editorDidMount={this.initializeEditor}
